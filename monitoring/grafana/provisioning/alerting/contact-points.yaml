@@ -1,0 +1,10 @@
+apiVersion: 1
+contactPoints:
+    - orgId: 1
+      name: webhook-test
+      receivers:
+        - uid: bfn18v383vi0wd
+          type: webhook
+          settings:
+            url: http://webhook-logger:8080
+          disableResolveMessage: false

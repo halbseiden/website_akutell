@@ -1,0 +1,114 @@
+Unable to find image 'grafana/k6:latest' locally
+latest: Pulling from grafana/k6
+4f4fb700ef54: Pulling fs layer
+189a4c2ff99e: Pulling fs layer
+18cab65b2591: Pulling fs layer
+4f4fb700ef54: Already exists
+189a4c2ff99e: Download complete
+189a4c2ff99e: Pull complete
+75fbac357682: Download complete
+18cab65b2591: Download complete
+4f4fb700ef54: Pull complete
+18cab65b2591: Pull complete
+Digest: sha256:632ddbc81a4a9fdc9e597da91ab1d8fcf1916dd988b43b4a4559d2f8d8e73d47
+Status: Downloaded newer image for grafana/k6:latest
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /scenarios/01-web-10-parallel-0s.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 45s max duration (incl. graceful stop):
+              * web: Up to 10 looping VUs for 15s over 1 stages (gracefulRampDown: 0s, gracefulStop: 30s)
+
+
+running (00.9s), 10/10 VUs, 25893 complete and 0 interrupted iterations
+web    [   6% ] 10/10 VUs  00.9s/15.0s
+
+running (01.9s), 10/10 VUs, 55474 complete and 0 interrupted iterations
+web    [  13% ] 10/10 VUs  01.9s/15.0s
+
+running (02.9s), 10/10 VUs, 89747 complete and 0 interrupted iterations
+web    [  19% ] 10/10 VUs  02.9s/15.0s
+
+running (03.9s), 10/10 VUs, 124594 complete and 0 interrupted iterations
+web    [  26% ] 10/10 VUs  03.9s/15.0s
+
+running (04.9s), 10/10 VUs, 159675 complete and 0 interrupted iterations
+web    [  33% ] 10/10 VUs  04.9s/15.0s
+
+running (05.9s), 10/10 VUs, 195158 complete and 0 interrupted iterations
+web    [  39% ] 10/10 VUs  05.9s/15.0s
+
+running (06.9s), 10/10 VUs, 224336 complete and 0 interrupted iterations
+web    [  46% ] 10/10 VUs  06.9s/15.0s
+
+running (07.9s), 10/10 VUs, 255748 complete and 0 interrupted iterations
+web    [  53% ] 10/10 VUs  07.9s/15.0s
+
+running (08.9s), 10/10 VUs, 290148 complete and 0 interrupted iterations
+web    [  59% ] 10/10 VUs  08.9s/15.0s
+
+running (09.9s), 10/10 VUs, 320057 complete and 0 interrupted iterations
+web    [  66% ] 10/10 VUs  09.9s/15.0s
+
+running (10.9s), 10/10 VUs, 351598 complete and 0 interrupted iterations
+web    [  73% ] 10/10 VUs  10.9s/15.0s
+
+running (11.9s), 10/10 VUs, 380443 complete and 0 interrupted iterations
+web    [  79% ] 10/10 VUs  11.9s/15.0s
+
+running (12.9s), 10/10 VUs, 407897 complete and 0 interrupted iterations
+web    [  86% ] 10/10 VUs  12.9s/15.0s
+
+running (13.9s), 10/10 VUs, 430817 complete and 0 interrupted iterations
+web    [  93% ] 10/10 VUs  13.9s/15.0s
+
+running (14.9s), 10/10 VUs, 462785 complete and 0 interrupted iterations
+web    [  99% ] 10/10 VUs  14.9s/15.0s
+
+
+  █ THRESHOLDS 
+
+    http_req_duration
+    ✓ 'p(95)<1000' p(95)=519.47µs
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 465552  31036.255039/s
+    checks_succeeded...: 100.00% 465552 out of 465552
+    checks_failed......: 0.00%   0 out of 465552
+
+    ✓ status 200
+
+    HTTP
+    http_req_duration..............: avg=295.26µs min=41.58µs med=236.37µs max=17.06ms p(90)=394.33µs p(95)=519.47µs
+      { expected_response:true }...: avg=295.26µs min=41.58µs med=236.37µs max=17.06ms p(90)=394.33µs p(95)=519.47µs
+    http_req_failed................: 0.00%  0 out of 465552
+    http_reqs......................: 465552 31036.255039/s
+
+    EXECUTION
+    iteration_duration.............: avg=319.42µs min=51.2µs  med=253.14µs max=41.17ms p(90)=422.54µs p(95)=558.45µs
+    iterations.....................: 465552 31036.255039/s
+    vus............................: 10     min=10          max=10
+    vus_max........................: 10     min=10          max=10
+
+    NETWORK
+    data_received..................: 535 MB 36 MB/s
+    data_sent......................: 21 MB  1.4 MB/s
+
+
+
+
+running (15.0s), 00/10 VUs, 465552 complete and 0 interrupted iterations
+web  ✓ [ 100% ] 00/10 VUs  15s

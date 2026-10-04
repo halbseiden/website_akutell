@@ -1,0 +1,398 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: DB
+      folder: DB
+      interval: 10s
+      rules:
+        - uid: dfn1kysdd29z4d
+          for: 20s
+          title: Datenbank ausgefallen
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: PBFA97CFB590B2093
+              model:
+                editorMode: code
+                expr: pg_up{job="postgres"}
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          # Keine Daten = DB-Zustand unbekannt (z. B. Exporter ausgefallen) -> Alarm.
+          noDataState: Alerting
+          execErrState: Error
+          annotations:
+            summary: PostgreSQL Datenbank ist nicht erreichbar
+          isPaused: false
+          notification_settings:
+            receiver: webhook-test
+    - orgId: 1
+      name: Container-Alerts
+      folder: Container
+      interval: 30s
+      rules:
+        - uid: bfn1w6xqjtse8c
+          title: Container abgestürzt
+          for: 30s
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: PBFA97CFB590B2093
+              model:
+                editorMode: code
+                expr: up{job=~"backend|postgres|prometheus|cadvisor|nginx-exporter"}
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: OK
+          execErrState: Error
+          annotations:
+            summary: 'Container abgestürzt: {{$labels.instance}} ist nicht erreichbar.'
+          isPaused: false
+          notification_settings:
+            receiver: webhook-test
+        - uid: cfn20esh4f20wb
+          title: CPU-Alert Applikation
+          condition: B
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: PBFA97CFB590B2093
+              model:
+                editorMode: code
+                expr: rate(container_cpu_usage_seconds_total{name=~"backend-1|backend-2|database"}[1m]) * 100
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 70
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: []
+                      reducer:
+                        params: []
+                        type: avg
+                      type: query
+                datasource:
+                    name: Expression
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: B
+                type: threshold
+          # Keine Daten = keine Container-Metriken (cAdvisor auf Docker Desktop/Mac liefert
+          # keine name-Labels). Kein Dauer-Alarm; ein Ausfall von cAdvisor selbst meldet
+          # "Container abgestürzt".
+          noDataState: OK
+          execErrState: Error
+          for: 1m
+          annotations:
+            Description: 'App-Container {{$labels.name}} hat eine CPU-Auslastung von {{ $value | printf "%.0f" }}%.'
+            Summary: '{{$labels.name}}: CPU-Auslastung über 70% für über 1 Minute (aktuell: {{ $value | printf "%.0f" }}%)'
+          isPaused: false
+          notification_settings:
+            receiver: webhook-test
+        - uid: afn20j2l5w64ge
+          title: CPU-Alert Infrastruktur
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: PBFA97CFB590B2093
+              model:
+                editorMode: code
+                expr: rate(container_cpu_usage_seconds_total{name=~"load-balancer|reverse-proxy|frontend|nginx-exporter|postgres-exporter|cadvisor"}[1m]) * 100
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 30
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          # Keine Daten = keine Container-Metriken (cAdvisor auf Docker Desktop/Mac liefert
+          # keine name-Labels). Kein Dauer-Alarm; ein Ausfall von cAdvisor selbst meldet
+          # "Container abgestürzt".
+          noDataState: OK
+          execErrState: Error
+          for: 1m
+          annotations:
+            description: 'Infra-Container {{$labels.name}} hat eine CPU-Auslastung von {{ $value | printf "%.0f" }}%.'
+            summary: '{{$labels.name}}: CPU-Auslastung über 30% für über 1 Minute (aktuell: {{ $value | printf "%.0f" }}%)'
+          isPaused: false
+          notification_settings:
+            receiver: webhook-test
+        - uid: cfn21jkexrls0b
+          title: RAM-Alert
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: PBFA97CFB590B2093
+              model:
+                editorMode: code
+                expr: container_memory_working_set_bytes{name=~".+", image!=""} / 1024 / 1024
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 800
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          # Keine Daten = keine Container-Metriken (cAdvisor auf Docker Desktop/Mac liefert
+          # keine name-Labels). Kein Dauer-Alarm; ein Ausfall von cAdvisor selbst meldet
+          # "Container abgestürzt".
+          noDataState: OK
+          execErrState: Error
+          for: 1m
+          annotations:
+            summary: '{{$labels.name}}: Speicherverbrauch über 800MB für über 1 Minute (aktuell: {{ $value | printf "%.0f" }} MB)'
+          isPaused: false
+          notification_settings:
+            receiver: webhook-test
+    - orgId: 1
+      name: backend
+      folder: Backend
+      interval: 10s
+      rules:
+        - uid: afn1839xinbi8a
+          for: 20s
+          title: Backend ausgefallen
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: PBFA97CFB590B2093
+              model:
+                editorMode: code
+                expr: "\tup{job=\"backend\"}"
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: OK
+          execErrState: Error
+          annotations:
+            summary: '{{ $labels.instance }} ist nicht erreichbar'
+          isPaused: false
+          notification_settings:
+            receiver: webhook-test
+    - orgId: 1
+      name: HTTP-Probes
+      folder: HTTP
+      interval: 10s
+      rules:
+        - uid: http-probe-down
+          title: HTTP-Service nicht erreichbar
+          condition: C
+          for: 1m
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: PBFA97CFB590B2093
+              model:
+                editorMode: code
+                expr: probe_success{job="blackbox"}
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              queryType: expression
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          noDataState: OK
+          execErrState: Error
+          annotations:
+            summary: 'HTTP-Service ausgefallen: {{$labels.instance}} antwortet nicht.'
+          isPaused: false
+          notification_settings:
+            receiver: webhook-test    

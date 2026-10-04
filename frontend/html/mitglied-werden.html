@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mitglied werden – OnlyFlames Förderverein</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html">Start</a>
+    <a href="mitglied-werden.html">Mitglied werden</a>
+    <a href="spenden.html">Spenden</a>
+  </nav>
+
+  <header class="hero-header">
+    <div class="hero-left-branding">
+      <div class="hero-logo">
+        <img src="./logo_trans.png" alt="OnlyFlames Logo">
+      </div>
+      <p>Werde Mitglied, um deine Gemeinschaft aktiv zu unterstützen.</p>
+    </div>
+    
+    <div class="hero-right-content">
+      <p style="color:white; font-size: 1.1rem;">Als Mitglied von OnlyFlames wirst du Teil einer engagierten Bewegung. Gestalte unsere Projekte aktiv mit, bringe deine eigenen Ideen ein und erhalte exklusive Einblicke in unsere Vereinsarbeit. Du bist volljährig und Dir ist unser Gemeinwesen nicht völlig gleichgültig? Du kannst Dir vorstellen, dass die Hilfe der Feuerwehr auch für Dich einmal wichtig werden könnte? Du könntest in die aktive Feuerwehr eintreten. Dich erwarten dort neben toller Kameradschaft eine umfangreiche interessante Ausbildung und moderne Technik. Das ist aber nicht allen möglich. Aber mit dem steuerlich absetzbaren Mitgliedsbeitrag für den Förderverein von nur 48 € im Jahr kannst Du Deine Solidarität beweisen und damit auch die ehrenamtlichen Leistungen der aktiven Feuerwehrangehörigen würdigen. </p>
+    </div>
+  </header>
+
+  <main>
+    <div class="form-container">
+      <h1>Mitgliedsantrag</h1>
+      <p style="text-align:center; color:#657786; margin-bottom: 1.5rem;">Felder mit * sind Pflichtfelder.</p>
+
+      <form id="mitgliedsantrag">
+        <label>Vorname <span class="required">*</span>
+          <input name="vorname" required maxlength="100" placeholder="Max">
+        </label>
+        <label>Nachname <span class="required">*</span>
+          <input name="nachname" required maxlength="100" placeholder="Mustermann">
+        </label>
+        <label>E-Mail <span class="required">*</span>
+          <input name="email" type="email" required maxlength="255" placeholder="max.mustermann@example.com">
+        </label>
+        <label>Telefon
+          <input name="telefon" type="tel" maxlength="30" placeholder="0123 456789">
+        </label>
+        <label>Geburtsdatum
+          <input name="geburtsdatum" type="date">
+        </label>
+        <label>Straße und Hausnummer
+          <input name="adresse_str" maxlength="200" placeholder="Musterstraße 1">
+        </label>
+        <label>PLZ
+          <input name="adresse_plz" maxlength="10" placeholder="12345">
+        </label>
+        <label>Ort
+          <input name="adresse_ort" maxlength="100" placeholder="Musterstadt">
+        </label>
+        <label>Art der Mitgliedschaft
+          <select name="mitgliedstyp">
+            <option value="regulaer">Reguläres Mitglied</option>
+            <option value="foerder">Fördermitglied</option>
+          </select>
+        </label>
+        <button type="submit">Antrag absenden</button>
+      </form>
+
+      <p class="status" id="status"></p>
+    </div>
+  </main>
+  
+  <footer>
+    &copy; 2026 OnlyFlames Förderverein e.V.
+  </footer>
+
+  <script>
+    const form = document.getElementById('mitgliedsantrag');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.style.color = "blue"; // Standard-Textfarbe während der Übertragung
+      status.textContent = 'Wird übermittelt …';
+
+      const data = Object.fromEntries(new FormData(form));
+      // Leze optionale Felder nicht mitschicken
+      Object.keys(data).forEach(k => { if (data[k] === '') delete data[k]; });
+
+      try {
+        const res = await fetch('/api/mitglieder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        if (res.ok) {
+          status.style.color = "green"; // Erfolgs-Farbe
+          status.textContent = 'Vielen Dank! Wir haben Ihren Antrag erhalten und melden uns in Kürze.';
+          form.reset();
+        } 
+        // 1. Backend-Ausfall (Nginx antwortet, weil Backend tot ist)
+        else if (res.status === 502 || res.status === 504) {
+          status.style.color = "red";
+          status.textContent = 'Wartungsarbeiten: Unser System ist aktuell nicht erreichbar. Bitte versuchen Sie es später noch einmal.';
+        } 
+        // 2. Datenbank-Ausfall (Backend läuft, aber DB-Query schlägt fehl)
+        else if (res.status === 500 || res.status === 503) {
+          status.style.color = "orange";
+          status.textContent = 'Datenbankfehler: Ihre Anfrage konnte aktuell nicht gespeichert werden. Bitte haben Sie etwas Geduld.';
+        } 
+        // 3. Fachliche Fehler (z. B. 400 Bad Request, 409 Conflict)
+        else {
+          status.style.color = "red";
+          try {
+            const errorData = await res.json();
+            // Nutzt die Fehlermeldung aus dem Backend (z.B. "Diese E-Mail ist bereits registriert")
+            status.textContent = errorData.error || 'Es ist ein unbekannter Fehler aufgetreten.';
+          } catch(e) {
+            status.textContent = 'Es ist ein Fehler aufgetreten. Bitte prüfen Sie Ihre Eingaben.';
+          }
+        }
+      } catch (err) {
+        status.style.color = "red";
+        status.textContent = 'Verbindungsfehler. Bitte prüfen Sie Ihre Internetverbindung.';
+      }
+    });
+  </script>
+</body>
+</html>

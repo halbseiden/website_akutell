@@ -1,0 +1,115 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /scenarios/09-api-5mb-10-parallel-0s.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 10 max VUs, 50s max duration (incl. graceful stop):
+              * api: Up to 10 looping VUs for 20s over 1 stages (gracefulRampDown: 0s, gracefulStop: 30s)
+
+
+running (01.0s), 10/10 VUs, 70 complete and 0 interrupted iterations
+api    [   5% ] 10/10 VUs  01.0s/20.0s
+
+running (02.0s), 10/10 VUs, 171 complete and 0 interrupted iterations
+api    [  10% ] 10/10 VUs  02.0s/20.0s
+
+running (02.9s), 10/10 VUs, 267 complete and 0 interrupted iterations
+api    [  15% ] 10/10 VUs  02.9s/20.0s
+
+running (04.0s), 10/10 VUs, 369 complete and 0 interrupted iterations
+api    [  20% ] 10/10 VUs  04.0s/20.0s
+
+running (04.9s), 10/10 VUs, 474 complete and 0 interrupted iterations
+api    [  25% ] 10/10 VUs  04.9s/20.0s
+
+running (05.9s), 10/10 VUs, 574 complete and 0 interrupted iterations
+api    [  30% ] 10/10 VUs  05.9s/20.0s
+
+running (07.0s), 10/10 VUs, 683 complete and 0 interrupted iterations
+api    [  35% ] 10/10 VUs  07.0s/20.0s
+
+running (08.0s), 10/10 VUs, 789 complete and 0 interrupted iterations
+api    [  40% ] 10/10 VUs  08.0s/20.0s
+
+running (08.9s), 10/10 VUs, 896 complete and 0 interrupted iterations
+api    [  45% ] 10/10 VUs  08.9s/20.0s
+
+running (10.0s), 10/10 VUs, 1001 complete and 0 interrupted iterations
+api    [  50% ] 10/10 VUs  10.0s/20.0s
+
+running (11.0s), 10/10 VUs, 1101 complete and 0 interrupted iterations
+api    [  55% ] 10/10 VUs  11.0s/20.0s
+
+running (11.9s), 10/10 VUs, 1210 complete and 0 interrupted iterations
+api    [  60% ] 10/10 VUs  11.9s/20.0s
+
+running (12.9s), 10/10 VUs, 1311 complete and 0 interrupted iterations
+api    [  65% ] 10/10 VUs  13.0s/20.0s
+
+running (13.9s), 10/10 VUs, 1415 complete and 0 interrupted iterations
+api    [  70% ] 10/10 VUs  13.9s/20.0s
+
+running (14.9s), 10/10 VUs, 1512 complete and 0 interrupted iterations
+api    [  75% ] 10/10 VUs  14.9s/20.0s
+
+running (15.9s), 10/10 VUs, 1616 complete and 0 interrupted iterations
+api    [  80% ] 10/10 VUs  15.9s/20.0s
+
+running (17.0s), 10/10 VUs, 1718 complete and 0 interrupted iterations
+api    [  85% ] 10/10 VUs  17.0s/20.0s
+
+running (17.9s), 10/10 VUs, 1802 complete and 0 interrupted iterations
+api    [  90% ] 10/10 VUs  17.9s/20.0s
+
+running (18.9s), 10/10 VUs, 1898 complete and 0 interrupted iterations
+api    [  95% ] 10/10 VUs  18.9s/20.0s
+
+running (20.0s), 10/10 VUs, 2001 complete and 0 interrupted iterations
+api    [ 100% ] 10/10 VUs  20.0s/20.0s
+
+
+  █ THRESHOLDS 
+
+    http_req_duration
+    ✓ 'p(95)<5000' p(95)=75.13ms
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 2020    100.604449/s
+    checks_succeeded...: 100.00% 2020 out of 2020
+    checks_failed......: 0.00%   0 out of 2020
+
+    ✓ status 201
+
+    HTTP
+    http_req_duration..............: avg=48.94ms min=19.26ms med=46.51ms max=224.02ms p(90)=66.32ms  p(95)=75.13ms 
+      { expected_response:true }...: avg=48.94ms min=19.26ms med=46.51ms max=224.02ms p(90)=66.32ms  p(95)=75.13ms 
+    http_req_failed................: 0.00%  0 out of 2020
+    http_reqs......................: 2020   100.604449/s
+
+    EXECUTION
+    iteration_duration.............: avg=99.27ms min=51.12ms med=95.69ms max=337.94ms p(90)=124.46ms p(95)=137.73ms
+    iterations.....................: 2020   100.604449/s
+    vus............................: 10     min=10        max=10
+    vus_max........................: 10     min=10        max=10
+
+    NETWORK
+    data_received..................: 459 kB 23 kB/s
+    data_sent......................: 11 GB  528 MB/s
+
+
+
+
+running (20.1s), 00/10 VUs, 2020 complete and 0 interrupted iterations
+api  ✓ [ 100% ] 00/10 VUs  20s

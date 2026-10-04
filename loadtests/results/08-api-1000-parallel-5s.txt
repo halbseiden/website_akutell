@@ -1,0 +1,85 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /scenarios/08-api-1000-parallel-5s.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 300 max VUs, 40s max duration (incl. graceful stop):
+              * api: Up to 1000.00 iterations/s for 10s over 2 stages (maxVUs: 100-300, gracefulStop: 30s)
+
+
+running (00.7s), 001/100 VUs, 42 complete and 0 interrupted iterations
+api    [   7% ] 001/100 VUs  00.7s/10s  0131.91 iters/s
+
+running (01.7s), 002/100 VUs, 273 complete and 0 interrupted iterations
+api    [  17% ] 001/100 VUs  01.7s/10s  0331.96 iters/s
+
+running (02.7s), 001/100 VUs, 706 complete and 0 interrupted iterations
+api    [  27% ] 001/100 VUs  02.7s/10s  0531.98 iters/s
+
+running (03.7s), 003/100 VUs, 1335 complete and 0 interrupted iterations
+api    [  37% ] 003/100 VUs  03.7s/10s  0731.71 iters/s
+
+running (04.7s), 003/100 VUs, 2167 complete and 0 interrupted iterations
+api    [  47% ] 003/100 VUs  04.7s/10s  0931.77 iters/s
+
+running (05.7s), 001/100 VUs, 3157 complete and 0 interrupted iterations
+api    [  57% ] 000/100 VUs  05.7s/10s  1000.00 iters/s
+
+running (06.7s), 000/100 VUs, 4157 complete and 0 interrupted iterations
+api    [  67% ] 000/100 VUs  06.7s/10s  1000.00 iters/s
+
+running (07.7s), 001/100 VUs, 5157 complete and 0 interrupted iterations
+api    [  77% ] 001/100 VUs  07.7s/10s  1000.00 iters/s
+
+running (08.7s), 001/100 VUs, 6158 complete and 0 interrupted iterations
+api    [  87% ] 001/100 VUs  08.7s/10s  1000.00 iters/s
+
+running (09.7s), 000/100 VUs, 7158 complete and 0 interrupted iterations
+api    [  97% ] 000/100 VUs  09.7s/10s  1000.00 iters/s
+
+
+  █ THRESHOLDS 
+
+    http_req_duration
+    ✓ 'p(95)<5000' p(95)=1.32ms
+
+    http_req_failed
+    ✓ 'rate<0.05' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 7500    749.864246/s
+    checks_succeeded...: 100.00% 7500 out of 7500
+    checks_failed......: 0.00%   0 out of 7500
+
+    ✓ status 201
+
+    HTTP
+    http_req_duration..............: avg=963.37µs min=410.2µs  med=748µs    max=38.42ms p(90)=1.09ms p(95)=1.32ms
+      { expected_response:true }...: avg=963.37µs min=410.2µs  med=748µs    max=38.42ms p(90)=1.09ms p(95)=1.32ms
+    http_req_failed................: 0.00%  0 out of 7500
+    http_reqs......................: 7500   749.864246/s
+
+    EXECUTION
+    iteration_duration.............: avg=1.09ms   min=446.62µs med=806.33µs max=38.69ms p(90)=1.21ms p(95)=1.62ms
+    iterations.....................: 7500   749.864246/s
+    vus............................: 1      min=0         max=2  
+    vus_max........................: 100    min=100       max=100
+
+    NETWORK
+    data_received..................: 1.9 MB 195 kB/s
+    data_sent......................: 2.5 MB 249 kB/s
+
+
+
+
+running (10.0s), 000/100 VUs, 7500 complete and 0 interrupted iterations
+api  ✓ [ 100% ] 000/100 VUs  10s  1000.00 iters/s

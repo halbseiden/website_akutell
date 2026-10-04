@@ -1,0 +1,11 @@
+apiVersion: 1
+
+policies:
+  - orgId: 1
+    receiver: webhook-test
+    group_by:
+      - alertname
+      - instance
+    group_wait: 10s        # Wartet 60s bevor erster Alert gesendet wird
+    group_interval: 2m     # Resolved kommt nach max.2 Min
+    repeat_interval: 4h

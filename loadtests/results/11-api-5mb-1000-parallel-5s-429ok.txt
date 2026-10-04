@@ -1,0 +1,111 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /scenarios/11-api-5mb-1000-parallel-5s-429ok.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 500 max VUs, 45s max duration (incl. graceful stop):
+              * api: Up to 200.00 iterations/s for 15s over 2 stages (maxVUs: 100-500, gracefulStop: 30s)
+
+
+running (00.6s), 002/100 VUs, 5 complete and 0 interrupted iterations
+api    [   4% ] 002/100 VUs  00.6s/15s  024.48 iters/s
+
+running (01.6s), 004/100 VUs, 48 complete and 0 interrupted iterations
+api    [  11% ] 004/100 VUs  01.6s/15s  064.81 iters/s
+
+running (02.6s), 017/100 VUs, 119 complete and 0 interrupted iterations
+api    [  17% ] 017/100 VUs  02.6s/15s  104.50 iters/s
+
+running (03.6s), 067/100 VUs, 186 complete and 0 interrupted iterations
+api    [  24% ] 067/100 VUs  03.6s/15s  144.64 iters/s
+
+running (04.6s), 098/100 VUs, 227 complete and 0 interrupted iterations
+api    [  31% ] 098/100 VUs  04.6s/15s  167.69 iters/s
+
+running (05.6s), 109/109 VUs, 248 complete and 0 interrupted iterations
+api    [  37% ] 109/109 VUs  05.6s/15s  200.00 iters/s
+
+running (06.7s), 118/118 VUs, 298 complete and 0 interrupted iterations
+api    [  44% ] 118/118 VUs  06.7s/15s  200.00 iters/s
+
+running (07.6s), 122/122 VUs, 347 complete and 0 interrupted iterations
+api    [  51% ] 122/122 VUs  07.6s/15s  200.00 iters/s
+
+running (08.6s), 128/131 VUs, 394 complete and 0 interrupted iterations
+api    [  57% ] 128/131 VUs  08.6s/15s  200.00 iters/s
+
+running (09.6s), 142/146 VUs, 436 complete and 0 interrupted iterations
+api    [  64% ] 142/146 VUs  09.6s/15s  200.00 iters/s
+
+running (10.7s), 159/169 VUs, 472 complete and 0 interrupted iterations
+api    [  71% ] 159/169 VUs  10.7s/15s  200.00 iters/s
+
+running (11.6s), 181/181 VUs, 484 complete and 0 interrupted iterations
+api    [  78% ] 181/181 VUs  11.6s/15s  200.00 iters/s
+
+running (12.6s), 199/199 VUs, 485 complete and 0 interrupted iterations
+api    [  84% ] 199/199 VUs  12.6s/15s  200.00 iters/s
+
+running (13.6s), 212/212 VUs, 486 complete and 0 interrupted iterations
+api    [  91% ] 212/212 VUs  13.6s/15s  200.00 iters/s
+
+running (14.9s), 176/214 VUs, 534 complete and 0 interrupted iterations
+api    [ 100% ] 176/214 VUs  14.9s/15s  200.00 iters/s
+
+running (15.6s), 128/214 VUs, 602 complete and 0 interrupted iterations
+api  ↓ [ 100% ] 150/214 VUs  15s  200.00 iters/s
+
+running (16.6s), 129/214 VUs, 608 complete and 0 interrupted iterations
+api  ↓ [ 100% ] 150/214 VUs  15s  200.00 iters/s
+
+running (17.6s), 119/214 VUs, 618 complete and 0 interrupted iterations
+api  ↓ [ 100% ] 150/214 VUs  15s  200.00 iters/s
+
+running (18.6s), 062/214 VUs, 675 complete and 0 interrupted iterations
+api  ↓ [ 100% ] 150/214 VUs  15s  200.00 iters/s
+
+
+  █ THRESHOLDS 
+
+    http_req_failed
+    ✓ 'rate<0.5' rate=0.00%
+
+    responses_5xx
+    ✓ 'count<10' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    responses_201..................: 737    38.783587/s
+    responses_5xx..................: 0      0/s
+
+    HTTP
+    http_req_duration..............: avg=2.1s  min=14.63ms med=1.75s max=9.01s  p(90)=4.55s p(95)=5.62s
+      { expected_response:true }...: avg=2.1s  min=14.63ms med=1.75s max=9.01s  p(90)=4.55s p(95)=5.62s
+    http_req_failed................: 0.00%  0 out of 737
+    http_reqs......................: 737    38.783587/s
+
+    EXECUTION
+    dropped_iterations.............: 1573   82.776909/s
+    iteration_duration.............: avg=2.95s min=47.41ms med=2.29s max=10.37s p(90)=6.86s p(95)=8.27s
+    iterations.....................: 737    38.783587/s
+    vus............................: 62     min=2        max=212
+    vus_max........................: 214    min=100      max=214
+
+    NETWORK
+    data_received..................: 982 kB 52 kB/s
+    data_sent......................: 3.9 GB 204 MB/s
+
+
+
+
+running (19.0s), 000/214 VUs, 737 complete and 0 interrupted iterations
+api  ✓ [ 100% ] 000/214 VUs  15s  200.00 iters/s

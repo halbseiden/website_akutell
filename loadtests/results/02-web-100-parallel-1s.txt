@@ -1,0 +1,103 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: /scenarios/02-web-100-parallel-1s.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 100 max VUs, 46s max duration (incl. graceful stop):
+              * web: Up to 100 looping VUs for 16s over 2 stages (gracefulRampDown: 0s, gracefulStop: 30s)
+
+
+running (00.3s), 030/100 VUs, 4364 complete and 0 interrupted iterations
+web    [   2% ] 030/100 VUs  00.3s/16.0s
+
+running (01.3s), 100/100 VUs, 25922 complete and 0 interrupted iterations
+web    [   8% ] 100/100 VUs  01.3s/16.0s
+
+running (02.3s), 100/100 VUs, 57509 complete and 0 interrupted iterations
+web    [  14% ] 100/100 VUs  02.3s/16.0s
+
+running (03.3s), 100/100 VUs, 91277 complete and 0 interrupted iterations
+web    [  21% ] 100/100 VUs  03.3s/16.0s
+
+running (04.3s), 100/100 VUs, 118140 complete and 0 interrupted iterations
+web    [  27% ] 100/100 VUs  04.3s/16.0s
+
+running (05.3s), 100/100 VUs, 149627 complete and 0 interrupted iterations
+web    [  33% ] 100/100 VUs  05.3s/16.0s
+
+running (06.3s), 100/100 VUs, 182489 complete and 0 interrupted iterations
+web    [  39% ] 100/100 VUs  06.3s/16.0s
+
+running (07.3s), 100/100 VUs, 212741 complete and 0 interrupted iterations
+web    [  46% ] 100/100 VUs  07.3s/16.0s
+
+running (08.3s), 100/100 VUs, 247455 complete and 0 interrupted iterations
+web    [  52% ] 100/100 VUs  08.3s/16.0s
+
+running (09.3s), 100/100 VUs, 278544 complete and 0 interrupted iterations
+web    [  58% ] 100/100 VUs  09.3s/16.0s
+
+running (10.3s), 100/100 VUs, 306175 complete and 0 interrupted iterations
+web    [  64% ] 100/100 VUs  10.3s/16.0s
+
+running (11.3s), 100/100 VUs, 338757 complete and 0 interrupted iterations
+web    [  71% ] 100/100 VUs  11.3s/16.0s
+
+running (12.3s), 100/100 VUs, 368344 complete and 0 interrupted iterations
+web    [  77% ] 100/100 VUs  12.3s/16.0s
+
+running (13.3s), 100/100 VUs, 394199 complete and 0 interrupted iterations
+web    [  83% ] 100/100 VUs  13.3s/16.0s
+
+running (14.3s), 100/100 VUs, 400661 complete and 0 interrupted iterations
+web    [  89% ] 100/100 VUs  14.3s/16.0s
+
+running (15.3s), 100/100 VUs, 411744 complete and 0 interrupted iterations
+web    [  96% ] 100/100 VUs  15.3s/16.0s
+
+
+  █ THRESHOLDS 
+
+    http_req_duration
+    ✓ 'p(95)<2000' p(95)=7.28ms
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 426088  26624.762721/s
+    checks_succeeded...: 100.00% 426088 out of 426088
+    checks_failed......: 0.00%   0 out of 426088
+
+    ✓ status 200
+
+    HTTP
+    http_req_duration..............: avg=3.59ms min=54.79µs med=2.75ms max=91.98ms p(90)=5.78ms p(95)=7.28ms
+      { expected_response:true }...: avg=3.59ms min=54.79µs med=2.75ms max=91.98ms p(90)=5.78ms p(95)=7.28ms
+    http_req_failed................: 0.00%  0 out of 426088
+    http_reqs......................: 426088 26624.762721/s
+
+    EXECUTION
+    iteration_duration.............: avg=3.63ms min=63.45µs med=2.77ms max=92.84ms p(90)=5.82ms p(95)=7.42ms
+    iterations.....................: 426088 26624.762721/s
+    vus............................: 100    min=30          max=100
+    vus_max........................: 100    min=100         max=100
+
+    NETWORK
+    data_received..................: 490 MB 31 MB/s
+    data_sent......................: 19 MB  1.2 MB/s
+
+
+
+
+running (16.0s), 000/100 VUs, 426088 complete and 0 interrupted iterations
+web  ✓ [ 100% ] 000/100 VUs  16s

@@ -1,0 +1,240 @@
+/* style.css */
+
+/* --- Globale Einstellungen & Modernisierung --- */
+:root {
+  /* Die Hauptfarbe, inspiriert von image_3.png */
+  --primary-blue: #1da1f2;
+  --header-bg-blue: #008fcc; /* Etwas dunkleres Blau für den Text-Kontrast */
+  --light-bg: #f5f8fa;
+  --form-bg: #ffffff;
+  --text-dark: #202020;
+  --text-muted: #657786;
+  --input-border: #ccd0d3;
+  
+  /* Starke Abrundung, inspiriert von image_3.png */
+  --border-radius-large: 100px; /* Für Buttons und Inputs */
+  --border-radius-card: 16px;   /* Für das Formular-Container */
+  
+  --spacing: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text-dark);
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* --- Navigation & Start --- */
+nav {
+  background-color: var(--form-bg);
+  padding: calc(var(--spacing) * 0.75) calc(var(--spacing) * 2);
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--spacing) * 1.5);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--primary-blue);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* --- Geteiltes Header-Layout (Inspirations-DNA) --- */
+.hero-header {
+  background-color: var(--header-bg-blue);
+  background-image: url('data:image/svg+xml;utf8,<svg ...> SVG Musters wie in image_3.png ... </svg>'); /* Optionales Hintergrundmuster */
+  background-size: cover;
+  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap; /* Damit es auf Handys untereinander bricht */
+  gap: calc(var(--spacing) * 2);
+  margin-bottom: calc(var(--spacing) * 3);
+}
+
+.hero-left-branding {
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
+  color: var(--form-bg);
+}
+
+.hero-logo {
+  font-size: 2.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.hero-logo img {
+  width: 160px;
+  height: auto;
+  display: block;
+}
+
+.hero-left-branding p {
+  font-size: 1.2rem;
+  margin-bottom: 0;
+}
+
+.hero-right-content {
+  flex: 1;
+  min-width: 300px;
+  max-width: 550px;
+}
+
+/* --- Haupt-Inhaltsbereich --- */
+main {
+  flex: 1;
+  padding: 0 var(--spacing) calc(var(--spacing) * 3);
+  display: flex;
+  justify-content: center;
+}
+
+.form-container {
+  background-color: var(--form-bg);
+  padding: calc(var(--spacing) * 2.5);
+  border-radius: var(--border-radius-card);
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.form-container h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: calc(var(--spacing) * 1.5);
+  text-align: center;
+}
+
+.main-logo {
+  width: 300px;
+  height: auto;
+  display: block;
+  margin: 20px auto;
+}
+
+/* --- Formular-Styling (Inspirations-DNA) --- */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+form label {
+  display: flex;
+  flex-direction: column;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+form label span.required {
+  color: var(--primary-blue);
+  margin-left: 3px;
+}
+
+/* Die stark abgerundeten Eingabefelder */
+form input[type="text"],
+form input[type="email"],
+form input[type="number"],
+form select {
+  border: 2px solid var(--input-border);
+  border-radius: var(--border-radius-large);
+  padding: calc(var(--spacing) * 0.75) calc(var(--spacing) * 1.25);
+  font-size: 1rem;
+  transition: border-color 0.2s, background-color 0.2s;
+  background-color: var(--form-bg);
+}
+
+form input:focus,
+form select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  background-color: #f0faff; /* Leichtes Blau beim Fokus */
+}
+
+/* Die stark abgerundeten Select-Eingaben */
+form select {
+  appearance: none; /* Versteckt den Standard-Pfeil */
+  background-image: url('data:image/svg+xml;utf8,<svg ...> SVG für einen kleinen Pfeil ... </svg>');
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  padding-right: 40px;
+}
+
+/* --- Der Haupt-Button (Inspirations-DNA) --- */
+form button[type="submit"] {
+  background-color: var(--primary-blue);
+  color: var(--form-bg);
+  border: none;
+  border-radius: var(--border-radius-large);
+  padding: calc(var(--spacing) * 0.9) calc(var(--spacing) * 1.5);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: calc(var(--spacing) * 1.25);
+  text-transform: uppercase; /* Modernisierter Look */
+}
+
+form button[type="submit"]:hover {
+  background-color: #1a91da; /* Etwas dunkler beim Hover */
+}
+
+/* --- Status-Nachrichten --- */
+.status {
+  text-align: center;
+  margin-top: var(--spacing);
+  font-weight: 600;
+}
+
+/* --- Footer --- */
+footer {
+  text-align: center;
+  padding: var(--spacing);
+  color: var(--text-muted);
+  background-color: var(--form-bg);
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+/* 1. Labels in eine eigene Zeile zwingen */
+label {
+  display: block !important; 
+  margin-bottom: 5px !important;
+}
+label * {
+  display: inline !important; /* Hält das Sternchen neben dem Text */
+}
+
+/* 2. ALLE Eingabefelder ansprechen (egal ob der type definiert ist oder nicht) */
+input:not([type="submit"]):not([type="button"]):not([type="radio"]):not([type="checkbox"]),
+select {
+  display: block !important;
+  width: 100% !important;
+  border-radius: 25px !important; 
+  padding: 12px 20px !important; 
+  border: 1px solid #b0b8c4 !important; 
+  box-sizing: border-box !important; 
+  margin-bottom: 20px !important;
+  height: auto !important; 
+}

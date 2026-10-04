@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spenden – OnlyFlames Förderverein</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html">Start</a>
+    <a href="mitglied-werden.html">Mitglied werden</a>
+    <a href="spenden.html">Spenden</a>
+  </nav>
+
+  <header class="hero-header">
+    <div class="hero-left-branding">
+      <div class="hero-logo">
+        <img src="./logo_trans.png" alt="OnlyFlames Logo">
+      </div>
+      <p>Helfen mit Feuer und Flamme</p>
+    </div>
+    
+    <div class="hero-right-content">
+      <p style="color:white; font-size: 1.1rem;">Die Verwendung der Mitgliedsbeiträge und Spenden dient insbesondere den Beschaffungsmaßnahmen, die nicht über den Gemeindehaushalt realisiert werden können. Bezuschusst werden u.a. Beschaffungen für die Jugendfeuerwehr, die Ausstattung der Gemeinschaftsräume und auch persönliche Ausrüstungen wie z. B. warme Wintermützen und Jacken. Ein Schwerpunkt liegt dabei auf der Unterstützung der Jugendfeuerwehr als aktive Kameraden von morgen.</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="form-container">
+      <h1>Spenden</h1>
+      <p style="text-align:center; color:#657786; margin-bottom: 1.5rem;">Jeder Betrag hilft. Vielen Dank für Ihre Unterstützung.</p>
+
+      <form id="spende">
+        <label>Name
+          <input name="spender_name" maxlength="200" placeholder="Ihr Vor- und Nachname">
+        </label>
+        <label>E-Mail
+          <input name="spender_email" type="email" maxlength="255" placeholder="ihre.email@example.com">
+        </label>
+        <label>
+          Betrag in Euro <span class="required">*</span>
+          <input name="betrag_eur" type="number" min="0.01" step="0.01" required placeholder="z.B. 25.00">
+        </label>
+        <label>Zweck
+          <select name="zweck">
+            <option value="Allgemein">Allgemein</option>
+            <option value="Vereinsfest">Vereinsfest</option>
+            <option value="Jugendarbeit">Jugendfeuerwehr</option>
+          </select>
+        </label>
+        <label>Zahlungsart
+          <select name="zahlungsart">
+            <option value="ueberweisung">Überweisung</option>
+            <option value="paypal">PayPal</option>
+          </select>
+        </label>
+        <button type="submit">Spende absenden</button>
+      </form>
+
+      <p class="status" id="status"></p>
+    </div>
+  </main>
+  
+  <footer>
+    &copy; 2026 OnlyFlames Förderverein e.V.
+  </footer>
+
+  <script>
+    const form = document.getElementById('spende');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.style.color = "blue"; // Standard-Textfarbe
+      status.textContent = 'Wird übermittelt …';
+
+      const data = Object.fromEntries(new FormData(form));
+      // EUR -> Cent: DB speichert betrag_cent als INT, um Float-Fehler zu vermeiden
+      data.betrag_cent = Math.round(parseFloat(data.betrag_eur) * 100);
+      delete data.betrag_eur;
+      Object.keys(data).forEach(k => { if (data[k] === '') delete data[k]; });
+
+      try {
+        const res = await fetch('/api/spenden', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        if (res.ok) {
+          status.style.color = "green"; // Erfolgs-Farbe
+          status.textContent = 'Vielen Dank für Ihre Spende!';
+          form.reset();
+        } 
+        // 1. Backend-Ausfall
+        else if (res.status === 502 || res.status === 504) {
+          status.style.color = "red";
+          status.textContent = 'Wartungsarbeiten: Unser System ist aktuell nicht erreichbar. Bitte versuchen Sie es später noch einmal.';
+        } 
+        // 2. Datenbank-Ausfall
+        else if (res.status === 500 || res.status === 503) {
+          status.style.color = "orange";
+          status.textContent = 'Datenbankfehler: Ihre Anfrage konnte aktuell nicht gespeichert werden. Bitte haben Sie etwas Geduld.';
+        } 
+        // 3. Fachliche Fehler (z.B. 400 Bad Request)
+        else {
+          status.style.color = "red";
+          status.textContent = 'Es ist ein Fehler aufgetreten. Bitte prüfen Sie Ihre Eingaben.';
+        }
+      } catch (err) {
+        status.style.color = "red";
+        status.textContent = 'Verbindungsfehler. Bitte prüfen Sie Ihre Internetverbindung.';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          instance: cadvisor
+    metric_relabel_configs:
+      - regex: 'container_label_.*'
+        action: labeldrop
+
+  - job_name: 'nginx-exporter'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels:
+          instance: nginx-exporter
+
+  - job_name: 'backend'
+    metrics_path: /metrics
+    static_configs:
+      - targets: [ 'backend-1:3000' ]
+        labels:
+          instance: backend-1
+      - targets: [ 'backend-2:3000' ]
+        labels:
+          instance: backend-2
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          instance: prometheus
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          instance: postgres
+
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [ http_2xx ]
+    static_configs:
+      - targets: [ 'http://frontend:80/' ]
+        labels:
+          instance: frontend
+      - targets: [ 'http://frontend-2:80/' ]
+        labels:
+          instance: frontend-2
+      - targets: [ 'http://load-balancer:80/lb-health' ]
+        labels:
+          instance: load-balancer
+      - targets: [ 'http://reverse-proxy:80/rp-health' ]
+        labels:
+          instance: reverse-proxy
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        target_label: __param_target
+      - source_labels: [ instance ]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

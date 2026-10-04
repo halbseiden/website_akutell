@@ -1,0 +1,14 @@
+{
+  "name": "verein-backend",
+  "version": "1.0.0",
+  "description": "Backend für die Vereins-Website (Mitgliedsanträge & Spenden)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "prom-client": "^15.1.0"
+  }
+}

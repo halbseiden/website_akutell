@@ -1,0 +1,462 @@
+# Fester Projektname: Netzwerke (it-infra-verein_public-net), Volumes und Image-Namen
+# (it-infra-verein-backend-1, ...) hängen sonst vom Verzeichnisnamen ab. loadtests/run.sh
+# und die Trivy-Befehle in der Doku verlassen sich auf diesen Namen.
+name: it-infra-verein
+
+services:
+  database:
+    build: ./db
+    container_name: database
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-verein}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-verein}
+    secrets:
+      - postgres_password
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - internal-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1g
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETUID
+      - SETGID
+
+  backend-1: &backend
+    build: ./backend
+    container_name: backend-1
+    # Mini-Init (tini) als PID 1: reicht Signale an Node weiter und räumt
+    # Zombie-Prozesse ab; Node fährt bei SIGTERM selbst sauber herunter.
+    init: true
+    environment:
+      POSTGRES_HOST: database
+      POSTGRES_USER: ${POSTGRES_USER:-verein}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-verein}
+    secrets:
+      - postgres_password
+    networks:
+      - internal-net
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    # Ressourcen-Limits: Compose v2 setzt deploy.resources.limits auch ohne
+    # Swarm als cgroup-Limits um. Werte = gemessener Lastspitzenwert + Puffer;
+    # 1g erlaubt mehrere parallele 5-MB-Bodies, der RAM-Alert (> 800 MB)
+    # schlägt bei ~80 % des Limits an.
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1g
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+
+  backend-2:
+    <<: *backend
+    container_name: backend-2
+
+  load-balancer:
+    image: nginx:1.31.6-alpine
+    container_name: load-balancer
+    volumes:
+      - ./nginx/load-balancer.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - public-net
+      - internal-net
+    depends_on:
+      backend-1:
+        condition: service_healthy
+      backend-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/lb-health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512m
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETUID
+      - SETGID
+
+  frontend: &frontend
+    build: ./frontend
+    container_name: frontend
+    networks:
+      - public-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/ | head -c 1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128m
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETUID
+      - SETGID
+
+  frontend-2:
+    <<: *frontend
+    container_name: frontend-2
+
+  reverse-proxy:
+    image: owasp/modsecurity-crs:4.29.0-nginx-alpine-202609301109
+    container_name: reverse-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - PARANOIA=1
+      - ANOMALY_INBOUND=5
+      - MODSEC_REQ_BODY_LIMIT=6291456
+      - MODSEC_REQ_BODY_NOFILES_LIMIT=6291456
+    volumes:
+      - ./nginx/reverse-proxy.conf:/etc/nginx/templates/nginx.conf.template:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    networks:
+      - public-net
+    depends_on:
+      frontend:
+        condition: service_healthy
+      frontend-2:
+        condition: service_healthy
+      load-balancer:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/rp-health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1g
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETUID
+      - SETGID
+
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - internal-net
+      - monitoring-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:9090/-/healthy || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512m
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+
+  grafana:
+    image: grafana/grafana:13.2.3
+    container_name: grafana
+    # Kein Host-Port: Grafana ist nur über den Reverse-Proxy unter
+    # https://localhost/grafana/ erreichbar (TLS + WAF).
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_SERVER_ROOT_URL: https://localhost/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_SECURITY_COOKIE_SECURE: "true"
+      # Keine Plugins beim Start aus dem Internet nachinstallieren/aktualisieren:
+      # Grafana 13 würde sonst das mitgelieferte Prometheus-Plugin ersetzen
+      # wollen, scheitert am read_only-Dateisystem und meldet es danach ab
+      # ("plugin not registered") - Dashboards und Alerts fallen dann aus.
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+    secrets:
+      - grafana_admin_password
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring-net
+      - public-net   # erreichbar für den Reverse-Proxy
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:3000/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 768m
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/log/grafana
+    cap_drop:
+      - ALL
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.55.1
+    container_name: cadvisor
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring-net
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256m
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.5.0
+    container_name: nginx-exporter
+    command:
+      - '--nginx.scrape-uri=http://reverse-proxy:8080/stub_status'
+    networks:
+      - monitoring-net
+      - public-net
+    depends_on:
+      reverse-proxy:
+        condition: service_healthy
+    # Kein Healthcheck: Das Image ist ein Scratch-Image ohne Shell/wget.
+    # Überwacht wird es über Prometheus (up{job="nginx-exporter"}) und die
+    # Alert-Regel "Container abgestürzt".
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64m
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+
+  db-backup:
+    image: postgres:17.11-alpine
+    container_name: db-backup
+    environment:
+      BACKUP_INTERVAL_SECONDS: 3600   # stündlich
+      BACKUP_RETENTION_DAYS: 7        # ältere Dumps werden gelöscht
+    secrets:
+      - postgres_password
+    volumes:
+      - db-backups:/backups
+    networks:
+      - internal-net
+    depends_on:
+      database:
+        condition: service_healthy
+    # Dump zuerst in eine .part-Datei schreiben und erst nach Erfolg umbenennen:
+    # Ein fehlgeschlagener pg_dump hinterlässt so keine leeren/halben Backups.
+    # --clean --if-exists: Der Dump löscht beim Restore vorhandene Objekte
+    # zuerst, damit er sich auch in eine schon initialisierte DB einspielen lässt.
+    entrypoint:
+      - sh
+      - -c
+      - |
+        while true; do
+          ts=$$(date +%Y%m%d_%H%M%S)
+          part=/backups/.backup_$$ts.sql.part
+          if PGPASSWORD=$$(cat /run/secrets/postgres_password) \
+               pg_dump -h database -U ${POSTGRES_USER:-verein} --clean --if-exists \
+               -f "$$part" ${POSTGRES_DB:-verein}; then
+            mv "$$part" "/backups/backup_$$ts.sql"
+            echo "Backup erfolgreich: backup_$$ts.sql"
+          else
+            rm -f "$$part"
+            echo "Backup FEHLGESCHLAGEN: $$(date)" >&2
+          fi
+          find /backups -name 'backup_*.sql' -mtime +$$BACKUP_RETENTION_DAYS -print -delete
+          sleep $$BACKUP_INTERVAL_SECONDS
+        done
+    # Gesund, solange es ein erfolgreiches Backup aus den letzten ~2 Stunden
+    # gibt (toleriert einen fehlgeschlagenen Lauf).
+    healthcheck:
+      test: ["CMD-SHELL", "find /backups -name 'backup_*.sql' -mmin -125 | grep -q ."]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+      start_period: 60s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256m
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.20.1
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_URI: "database:5432/${POSTGRES_DB:-verein}?sslmode=disable"
+      DATA_SOURCE_USER: "${POSTGRES_USER:-verein}"
+      DATA_SOURCE_PASS_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    networks:
+      - internal-net
+      - monitoring-net
+    depends_on:
+      database:
+        condition: service_healthy
+    # Prüft nur den Exporter selbst: /metrics antwortet auch bei DB-Ausfall
+    # (dann mit pg_up 0), damit der Ausfall im Monitoring sichtbar bleibt.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:9187/metrics || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128m
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.28.0
+    container_name: blackbox-exporter
+    networks:
+      - internal-net
+      - public-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:9115/-/healthy || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64m
+    read_only: true
+    cap_drop:
+      - ALL
+
+  webhook-logger:
+    image: mendhak/http-https-echo:42
+    container_name: webhook-logger
+    # Kein Host-Port: eingehende Alerts per `docker compose logs webhook-logger`.
+    environment:
+      DISABLE_REQUEST_LOGS: "true"   # keine Access-Log-Zeilen, nur Alert-Payloads
+      LOG_IGNORE_PATH: "^/healthz$"  # Healthcheck-Requests nicht loggen
+    networks:
+      - monitoring-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 128m
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  grafana_admin_password:
+    file: ./secrets/grafana_admin_password.txt
+
+networks:
+  public-net:
+  internal-net:
+    internal: true
+  monitoring-net:
+
+volumes:
+  db-data:
+  db-backups:
+  prometheus-data:
+  grafana-data:

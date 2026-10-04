@@ -1,0 +1,17 @@
+# Lokale Environment-Dateien (Defaults stehen in docker-compose.yml)
+.env
+.env.*
+
+# Dependencies (per Dockerfile/npm ci im Container installiert)
+node_modules/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+security-scan/.trivy-cache/
+
+#Secrets
+secrets/
